@@ -1,0 +1,27 @@
+{
+    "entities":[
+       {
+          "count":1,
+          "id":"1837f8ac59945998359",
+          "components":[
+             {
+                "value":20,
+                "name":"health"
+             },
+             {
+                "x":50,
+                "y":56,
+                "name":"position"
+             },
+             {
+                "w":50,
+                "h":50,
+                "name":"dimension"
+             },
+             {
+                "name":"sprite"
+             }
+          ]
+       }
+    ]
+ }

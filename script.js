@@ -1,3 +1,5 @@
+//import data from './data.json' assert {type:"json"};
+
 //canvas element
 /** @type {HTMLCanvasElement} */
 const canvas =  document.getElementById('canvas1');
@@ -24,19 +26,23 @@ class Entity{
     constructor(){
         this.id =(+new Date()).toString(16) + (Math.random() * 100000000 | 0).toString();
         this.count++;
-        this.components ={};
+        this.components = new Map();
     }
     // ADD COMPONENT TO ENTITY
-    addComponent(component){
-        this.components[component.name]=component;
+    addComponent(component){        
+        this.components.set(component.name, component);
+    }
+    // GET COMPONENT
+    getComponent(componentName){
+        return this.components.get(componentName);
     }
     // REMOVE COMPONENT TO ENTITY
     removeComponent(componentName){
-        delete this.components[componentName];
+       this.components.delete(componentName);
     }
     // PRINT COMPONENT IN THE ENTITY
     print(){
-        console.log(JSON.stringify(this, null, 4));
+        console.log(JSON.stringify(this, null, 4));       
     }
 
 }
@@ -56,6 +62,14 @@ class ComponentPosition{
     }
 }
 
+class ComponentVelocity{
+    constructor( setting ) {
+        this.dx = setting.dx || 0;
+        this.dy = setting.dy || 0;
+        this.name = 'velocity';
+    }
+}
+
 class ComponentDimension{
     constructor(setting){
         this.w = (setting)?setting.w : 50;
@@ -70,40 +84,66 @@ class ComponenetSprite{
     }
 }
 
-
-//
-
 class SystemRender{
-    constructor( entities ){
+    constructor( entities, ctx ){
         this.entities = entities;
+        this.ctx = ctx;
         this.pos = null;
         this.dim = null;
         this.sprite = null;
     }
     //
-    render(ctx){
+    run(dt){
         for (let [entityId, entity] of Object.entries(this.entities)){
-           for(let [componentId, component] of Object.entries(entity.components)){
-              if(component.name === 'position'){
-                this.pos = component;
-              }
-              //
-              if(component.name === 'dimension'){
-                this.dim = component;                
-              }
-              //
-              if(component.name === 'sprite'){
-                this.sprite = component;
-              }
+           for (const [key, component] of entity.components) {
+               if(component.name === 'position'){
+                 this.pos = component;
+               }            
+               //
+               if(component.name === 'dimension'){
+                 this.dim = component;                
+               }
+               //
+               if(component.name === 'sprite'){
+                 this.sprite = component;
+               }
+    
+               if(this.sprite){
+                 this.ctx.beginPath();
+                 this.ctx.fillStyle ='#ff8080';
+                 this.ctx.fillRect(this.pos.x, this.pos.y, this.dim.w, this.dim.h);
+                 this.ctx.closePath();
+               }                          
+           }
+        }
+    }
 
-              if(this.sprite){
-                ctx.beginPath();
-                ctx.fillStyle ='#ff8080';
-                ctx.fillRect(this.pos.x, this.pos.y, this.dim.w, this.dim.h);
-                ctx.closePath();                
+}
 
-              }
+class SystemMovement{
+    constructor( entities ){
+        this.entities = entities;
+        this.pos = null;
+        this.dim = null;
+        this.vel = null;
+    }
+    //
+    run(dt){
+        for (let [entityId, entity] of Object.entries(this.entities)){
+           for (const [key, component] of entity.components) {
+               if(component.name === 'position'){
+                 this.pos = component;
+               }            
+               //
+               if(component.name === 'dimension'){
+                 this.dim = component;                
+               }
+               //
+               if(component.name === 'velocity'){
+                 this.vel = component;                
+               }
 
+                     
            }
         }
     }
@@ -111,32 +151,33 @@ class SystemRender{
 }
 
 
-
-const entity1 = new Entity();
 const entities = [];
-const systemRender = new SystemRender(entities);
+const systems = [];
 
 //*-------------------------------------------------------------------------------------*//
 //*----------------------------------GAME LOOP------------------------------------------*//
 //*-------------------------------------------------------------------------------------*//
 
 //setinitialState
-function setInitState(){
-   
-    
-    const health = new ComponentHealth();
-    const position = new ComponentPosition({x: 50, y:56});
-    
-    entity1.addComponent(health);
-    entity1.addComponent(position);
+function setInitState(){    
+    const entity1 = new Entity();
+    entity1.addComponent(new ComponentHealth());
+    entity1.addComponent(new ComponentPosition({x: 50, y:56}));
     entity1.addComponent(new ComponentDimension());
     entity1.addComponent(new ComponenetSprite());
-    
-    entities.push(entity1);
-    entity1.print();
+    //
+    const entity2 = new Entity();
+    entity2.addComponent(new ComponentHealth());
+    entity2.addComponent(new ComponentPosition({x: 350, y:56}));
+    entity2.addComponent(new ComponentDimension());
+    entity2.addComponent(new ComponenetSprite());
 
-    entity1.removeComponent('helath');
-    entity1.print();
+    //
+    entities.push(entity1);
+    entities.push(entity2);
+
+    systems.push(new SystemRender(entities, ctx));
+   
 
 }
 
@@ -150,9 +191,11 @@ function draw(dt){
     //clear canva
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    
-    systemRender.render(ctx);
-   
+    //RUN ALL SYSTEMS
+    for (let i = 0; i < systems.length; i++) {
+        systems[i].run(dt)        
+    }
+
 }
 
 let now = 0;
