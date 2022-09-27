@@ -130,6 +130,18 @@ class SystemMovement{
     //
     run(dt){
         for (let [entityId, entity] of Object.entries(this.entities)){
+
+            if(entity.components.has('velocity')){
+                this.pos = entity.components.get('position');
+                this.vel = entity.components.get('velocity');
+
+                entity.components.get('position').x += this.vel.dx * dt;
+                //console.log(this.vel);
+
+
+            }
+
+            /*--
            for (const [key, component] of entity.components) {
                if(component.name === 'position'){
                  this.pos = component;
@@ -143,13 +155,17 @@ class SystemMovement{
                  this.vel = component;                
                }
 
+               if(this.pos !== null && this.vel !== null){
+                    //component.x += component.dx * dt;
+                    console.log((component.dx * dt));
+               }
                      
            }
+           --*/
         }
     }
 
 }
-
 
 const entities = [];
 const systems = [];
@@ -167,17 +183,18 @@ function setInitState(){
     entity1.addComponent(new ComponenetSprite());
     //
     const entity2 = new Entity();
-    entity2.addComponent(new ComponentHealth());
+    entity2.addComponent(new ComponentHealth(30));
     entity2.addComponent(new ComponentPosition({x: 350, y:56}));
     entity2.addComponent(new ComponentDimension());
     entity2.addComponent(new ComponenetSprite());
+    entity2.addComponent(new ComponentVelocity({dx: 0.5, dy: 5}));
 
     //
     entities.push(entity1);
     entities.push(entity2);
 
     systems.push(new SystemRender(entities, ctx));
-   
+    systems.push(new SystemMovement(entities, ctx));
 
 }
 
