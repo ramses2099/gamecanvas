@@ -1,4 +1,7 @@
 //import data from './data.json' assert {type:"json"};
+import { createEntity } from './entity.js';
+import { Componets } from './components.js';
+import { Systems } from './systems.js';
 
 //canvas element
 /** @type {HTMLCanvasElement} */
@@ -17,184 +20,45 @@ window.addEventListener('resize', function(){
     canvas.height = window.innerHeight;
 });
 
-//*-------------------------------------------------------------------------------------*//
-//*----------------------------------ECS------------------------------------------------*//
-//*-------------------------------------------------------------------------------------*//
-class Entity{
-    count = 0;
 
-    constructor(){
-        this.id =(+new Date()).toString(16) + (Math.random() * 100000000 | 0).toString();
-        this.count++;
-        this.components = new Map();
-    }
-    // ADD COMPONENT TO ENTITY
-    addComponent(component){        
-        this.components.set(component.name, component);
-    }
-    // GET COMPONENT
-    getComponent(componentName){
-        return this.components.get(componentName);
-    }
-    // REMOVE COMPONENT TO ENTITY
-    removeComponent(componentName){
-       this.components.delete(componentName);
-    }
-    // PRINT COMPONENT IN THE ENTITY
-    print(){
-        console.log(JSON.stringify(this, null, 4));       
-    }
-
-}
-//
-class ComponentHealth{
-    constructor( value ) {
-        this.value = value || 20;
-        this.name = 'health';
-    }
-}
-
-class ComponentPosition{
-    constructor( setting ) {
-        this.x = setting.x || 0;
-        this.y = setting.y || 0;
-        this.name = 'position';
-    }
-}
-
-class ComponentVelocity{
-    constructor( setting ) {
-        this.dx = setting.dx || 0;
-        this.dy = setting.dy || 0;
-        this.name = 'velocity';
-    }
-}
-
-class ComponentDimension{
-    constructor(setting){
-        this.w = (setting)?setting.w : 50;
-        this.h = (setting)?setting.h : 50;
-        this.name = 'dimension';
-    }
-}
-
-class ComponenetSprite{
-    constructor(setting){
-        this.name = 'sprite';        
-    }
-}
-
-class SystemRender{
-    constructor( entities, ctx ){
-        this.entities = entities;
-        this.ctx = ctx;
-        this.pos = null;
-        this.dim = null;
-        this.sprite = null;
-    }
-    //
-    run(dt){
-        for (let [entityId, entity] of Object.entries(this.entities)){
-           for (const [key, component] of entity.components) {
-               if(component.name === 'position'){
-                 this.pos = component;
-               }            
-               //
-               if(component.name === 'dimension'){
-                 this.dim = component;                
-               }
-               //
-               if(component.name === 'sprite'){
-                 this.sprite = component;
-               }
-    
-               if(this.sprite){
-                 this.ctx.beginPath();
-                 this.ctx.fillStyle ='#ff8080';
-                 this.ctx.fillRect(this.pos.x, this.pos.y, this.dim.w, this.dim.h);
-                 this.ctx.closePath();
-               }                          
-           }
-        }
-    }
-
-}
-
-class SystemMovement{
-    constructor( entities ){
-        this.entities = entities;
-        this.pos = null;
-        this.dim = null;
-        this.vel = null;
-    }
-    //
-    run(dt){
-        for (let [entityId, entity] of Object.entries(this.entities)){
-
-            if(entity.components.has('velocity')){
-                this.pos = entity.components.get('position');
-                this.vel = entity.components.get('velocity');
-
-                entity.components.get('position').x += this.vel.dx * dt;
-                //console.log(this.vel);
-
-
-            }
-
-            /*--
-           for (const [key, component] of entity.components) {
-               if(component.name === 'position'){
-                 this.pos = component;
-               }            
-               //
-               if(component.name === 'dimension'){
-                 this.dim = component;                
-               }
-               //
-               if(component.name === 'velocity'){
-                 this.vel = component;                
-               }
-
-               if(this.pos !== null && this.vel !== null){
-                    //component.x += component.dx * dt;
-                    console.log((component.dx * dt));
-               }
-                     
-           }
-           --*/
-        }
-    }
-
-}
-
+//ALL SYSTEMS
+const sys = [];
 const entities = [];
-const systems = [];
+
+// style
+const styles = ['#F70B0B','#0B2BF7','#3B9B0A','#9B790A'];
+
+function randomStyles(){
+    return styles[Math.floor((Math.random()*styles.length))];
+}
 
 //*-------------------------------------------------------------------------------------*//
 //*----------------------------------GAME LOOP------------------------------------------*//
 //*-------------------------------------------------------------------------------------*//
 
 //setinitialState
-function setInitState(){    
-    const entity1 = new Entity();
-    entity1.addComponent(new ComponentHealth());
-    entity1.addComponent(new ComponentPosition({x: 50, y:56}));
-    entity1.addComponent(new ComponentDimension());
-    entity1.addComponent(new ComponenetSprite());
+function setInitState(){
+    let entity = createEntity();
+    entity.AddComponent(Componets.Health());
+    entity.AddComponent(Componets.Position({x:500,y:60}));
+    entity.AddComponent(Componets.Sprite('#F90C0C'));
+    entity.AddComponent(Componets.Dimension({w:50,h:70}));
+    
+    
+    let entity1 = createEntity('Player');
+    entity1.AddComponent(Componets.Health());
+    entity1.AddComponent(Componets.Position({x:50,y:700}));
+    entity1.AddComponent(Componets.Sprite('#163DDA'));
+    entity1.AddComponent(Componets.Dimension({w:50,h:70}));
+    
     //
-    const entity2 = new Entity();
-    entity2.addComponent(new ComponentHealth(30));
-    entity2.addComponent(new ComponentPosition({x: 350, y:56}));
-    entity2.addComponent(new ComponentDimension());
-    entity2.addComponent(new ComponenetSprite());
-    entity2.addComponent(new ComponentVelocity({dx: 0.5, dy: 5}));
-
-    //
+    entities.push(entity);
     entities.push(entity1);
-    entities.push(entity2);
 
-    systems.push(new SystemRender(entities, ctx));
-    systems.push(new SystemMovement(entities, ctx));
+
+    //render system
+    sys.push(Systems.SystemRender(ctx, entities));
+ 
 
 }
 
@@ -208,11 +72,14 @@ function draw(dt){
     //clear canva
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    //RUN ALL SYSTEMS
-    for (let i = 0; i < systems.length; i++) {
-        systems[i].run(dt)        
+    for (let i = 0; i < sys.length; i++) {
+        const system = sys[i];
+        //
+        system.Run(dt);
+        
     }
 
+    console.log(getComputedStyle());
 }
 
 let now = 0;
