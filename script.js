@@ -32,27 +32,47 @@ function randomStyles(){
     return styles[Math.floor((Math.random()*styles.length))];
 }
 
+function randomPosition(min, max){
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+
 //*-------------------------------------------------------------------------------------*//
 //*----------------------------------GAME LOOP------------------------------------------*//
 //*-------------------------------------------------------------------------------------*//
 
 //setinitialState
 function setInitState(){
-    let entity = createEntity();
-    entity.AddComponent(Componets.Health());
-    entity.AddComponent(Componets.Position({x:500,y:60}));
-    entity.AddComponent(Componets.Sprite('#F90C0C'));
-    entity.AddComponent(Componets.Dimension({w:50,h:70}));
+    let style = null;
     
+    let pos = {
+        x:0,
+        y:0
+    };
+    //
     
+    for (let i = 0; i < 10; i++) {
+        pos.x = randomPosition(50,canvas.width);
+        pos.y = randomPosition(50,canvas.height);
+        style = randomStyles();
+    
+        let entity = createEntity();
+        entity.AddComponent(Componets.Health());
+        entity.AddComponent(Componets.Position(pos));
+        entity.AddComponent(Componets.Sprite(style));
+        entity.AddComponent(Componets.Dimension({w:50,h:70}));
+        entities.push(entity);        
+    }
+    //
+
+    style = randomStyles();
     let entity1 = createEntity('Player');
     entity1.AddComponent(Componets.Health());
     entity1.AddComponent(Componets.Position({x:50,y:700}));
-    entity1.AddComponent(Componets.Sprite('#163DDA'));
+    entity1.AddComponent(Componets.Sprite(style));
     entity1.AddComponent(Componets.Dimension({w:50,h:70}));
     
     //
-    entities.push(entity);
     entities.push(entity1);
 
 
@@ -79,7 +99,7 @@ function draw(dt){
         
     }
 
-    console.log(getComputedStyle());
+    
 }
 
 let now = 0;

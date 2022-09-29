@@ -26,7 +26,7 @@ const Componets =(()=>{
     //
     const Sprite = function(style){
         let name = 'sprite';
-        style = style || '#fff';
+        style = style || '#FFFFFF';
         return{ name, style };
     }
 

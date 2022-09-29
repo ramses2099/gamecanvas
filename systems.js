@@ -37,6 +37,32 @@ const Systems =(()=>{
         }
 
     }
+
+    //system Movement
+    const systemMovement = function(ctx, entities = [] ){
+        
+        //run
+        const run = function(dt){
+            if(entities.length > 0){
+                for (let i = 0; i < entities.length; i++) {
+                    const entity = entities[i];
+                    //
+                    if(entity.HasComponent('position')){
+                        let pos = entity.GetComponentByName('position');
+                        let dim = entity.GetComponentByName('dimension');            
+                        
+                        
+                    }
+                }
+
+            }
+        }
+
+        return{
+            "Run":run
+        }
+
+    }
     //
 
 
