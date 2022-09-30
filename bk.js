@@ -36,6 +36,12 @@ function randomPosition(min, max){
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function renderFPS(ctx, dt){
+    ctx.font ="35px serif";
+    ctx.fillStyle ="#FFFFFF";
+    ctx.fillText(`FPS:${dt}`, 10, 50);
+}
+
 
 //*-------------------------------------------------------------------------------------*//
 //*----------------------------------GAME LOOP------------------------------------------*//
@@ -43,14 +49,6 @@ function randomPosition(min, max){
 
 //setinitialState
 function setInitState(){
-    let entityText = createEntity();
-    entityText.AddComponent(Componets.Position({x:10, y:50}));
-    entityText.AddComponent(Componets.Sprite('#FFFFFF'));
-    entityText.AddComponent(Componets.SpriteType(Componets.SpriteType().FILL_TEXT));
-    entityText.AddComponent(Componets.FPS());
-    entityText.AddComponent(Componets.Text(''));
-    entities.push(entityText);  
-
     let style = null;
     
     let pos = {
@@ -67,37 +65,26 @@ function setInitState(){
         let entity = createEntity();
         entity.AddComponent(Componets.Health());
         entity.AddComponent(Componets.Position(pos));
-        entity.AddComponent(Componets.SpriteType());
         entity.AddComponent(Componets.Sprite(style));
         entity.AddComponent(Componets.Dimension({w:50,h:70}));
         entities.push(entity);        
     }
     //
 
-    style = '#38f';
+    style = randomStyles();
     let entity1 = createEntity('Player');
     entity1.AddComponent(Componets.Health());
     entity1.AddComponent(Componets.Position({x:50,y:700}));
-    entity1.AddComponent(Componets.SpriteType(Componets.SpriteType().STROKE_RECT));
     entity1.AddComponent(Componets.Sprite(style));
     entity1.AddComponent(Componets.Dimension({w:50,h:70}));
-    entities.push(entity1);
-
+    
     //
-    let entityArc = createEntity();
-    entityArc.AddComponent(Componets.Position({x:300,y:500}));
-    entityArc.AddComponent(Componets.Velocity({vx:0, vy:0}));
-    entityArc.AddComponent(Componets.Acceleration({ax:0.5, ay:0.5}));
-    entityArc.AddComponent(Componets.SpriteType(Componets.SpriteType().ARC));
-    entityArc.AddComponent(Componets.Sprite(style));
-    entityArc.AddComponent(Componets.Arc({radius:25,stroke:0,lineWidth:5}));
-    entities.push(entityArc);
+    entities.push(entity1);
 
 
     //render system
     sys.push(Systems.SystemRender(ctx, entities));
-    sys.push(Systems.SystemMovement(ctx, entities));
-
+ 
 
 }
 
@@ -110,7 +97,10 @@ function update(dt){
 function draw(dt){
     //clear canva
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-   
+    
+    //render FPS
+    renderFPS(ctx, dt);
+
     for (let i = 0; i < sys.length; i++) {
         const system = sys[i];
         //
@@ -121,30 +111,24 @@ function draw(dt){
     
 }
 
-let fps = 30;
-let delta = 0; //delta time
-let lastTime = window.performance.now();
-let currentTime =0;
-let interval = 1000/fps;
-
+let now = 0;
+let dt = 0; //delta time
+let last = window.performance.now();
+let step = 1/60;
 
 //Immediately-Invoked Function Expression (IIFE)
 ;(()=>{
     function main(){
-        currentTime = window.performance.now();
-        delta = (currentTime - lastTime);
-
-        if(delta > interval){
-
+        now = window.performance.now();
+        dt = dt + Math.min(1, (now - last ) / 1000);
+        while(dt > step){
+            dt = dt - step
             //update
-            update(delta);
-            //render
-            draw(delta);
-
-            //
-            lastTime = currentTime - (delta%interval);
+            update(dt)
         }
-
+        //draw
+        draw(dt);
+        last = now;
         window.requestAnimationFrame(main);
     }
    
