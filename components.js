@@ -1,81 +1,80 @@
 //*-------------------------------------------------------------------------------------*//
 //*----------------------------------ECS COMPONENTS-------------------------------------*//
 //*-------------------------------------------------------------------------------------*//
+import { Tags } from "./tags.js";
+
 //Module Pattern IIFF
 const Componets =(()=>{
 
-    const Health = function(value){
-        const name = 'health';
-        value = value || 50;         
-        return {name, value};
+    const Health = function(value){        
+        let state = { value: value || 50};      
+        return {name:Tags.Health, state};
     };
     //
     const Position = function(pos){
-        const name = 'position';
-        let x = pos.x || 0;
-        let y = pos.y || 0;
-        return {name, x, y};
+        let state ={
+          x: pos.x || 0,
+          y: pos.y || 0
+        };
+        return {name:Tags.Position, state};
     };
     //
     const Velocity = function(vel){
-        const name = 'velocity';
-        let vx = vel.vx || 0;
-        let vy = vel.vy || 0;
-        return {name, vx, vy};
+        let state = {
+            vx : (vel) ? vel.vx : 0,
+            vy : (vel) ? vel.vy : 0
+        }
+        return {name:Tags.Velocity, state};
     };
     //
-    const Acceleration = function(acc){
-        const name = 'acceleration';
-        let ax = acc.ax || 0;
-        let ay = acc.ay || 0;
-        return {name, ax, ay};
+    const Acceleration = function(acc){        
+        let state ={
+          ax: (acc) ? acc.ax : 0,
+          ay: (acc) ? acc.ay : 0
+        }
+        return {name:Tags.Acceleration, state};
     };
     //
     const Dimension = function(dim){
-        const name = 'dimension';
-        let w = dim.w || 50;
-        let h = dim.h || 50;
-        return {name, w, h};
+        let state ={
+           w : (dim ) ? dim.w : 50,
+           h : (dim) ? dim.h : 50
+        };
+        return {name:Tags.Dimension, state};
     };
     //
-    const Sprite = function(style){
-        const name = 'sprite';
-        style = style || '#FFFFFF';
-        return{ name, style };
+    const Sprite = function(setting){        
+        let state ={
+            src:setting.src,
+            image:setting.image
+        }
+        return{ name:Tags.Sprite, state };
     };
     //
-    const Text = function(text){
-        const name = 'text';
-        text = text || 'none';
-        return{ name, text };
-    };
-    //
-    const Arc = function(obj){
-        const name = 'arc';
-        let radius = obj.radius || 50;
-        let stroke = obj.stroke || 0;
-        let lineWidth = obj.lineWidth || 0;
-        return{ name, radius, stroke, lineWidth };
-    };
-    //
-    const FPS = function(){
-        const name = 'fps';
-        return{ name };
-    };
-    //
-    const SpriteType = function(type){
-        const name = 'spritetype';
-        const FILL_RECT = 'fillRect';
-        const FILL_TEXT = 'fillText';
-        const ARC = 'arc';
-        const DRAW_IMAGE = 'drawImage';
-        const STROKE_RECT = 'strokeRect';
-        type = type || FILL_RECT;
-
-        return {name, FILL_RECT, FILL_TEXT, ARC, DRAW_IMAGE, STROKE_RECT, type};
+    const Shape = function(setting){
+        let state ={
+            style: setting.style || '#FFFFFF',
+            type: setting.type,
+            radius: setting.radius || 0,
+            stroke: setting.stroke || 0,
+            lineWidth: setting.lineWidth || 0,
+        }
+        return{name:Tags.Shape, state}
     }
     //
-    return {Health,Position,Dimension,Sprite,SpriteType,Arc,Velocity,Acceleration,Text,FPS};
+    const Text = function(text){
+        let state ={
+            text : text || 'none'
+        };
+        return{ name:Tags.Text, state };
+    };
+    //
+    const FPS = function(){        
+        return{ name:Tags.FPS };
+    };
+    //
+    
+    return {Health,Position,Dimension,Sprite,Shape,Velocity,Acceleration,Text,FPS};
 })();
 
 export {Componets}

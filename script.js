@@ -2,6 +2,7 @@
 import { createEntity } from './entity.js';
 import { Componets } from './components.js';
 import { Systems } from './systems.js';
+import { Tags } from './tags.js';
 
 //canvas element
 /** @type {HTMLCanvasElement} */
@@ -43,56 +44,48 @@ function randomPosition(min, max){
 
 //setinitialState
 function setInitState(){
+
+    //FPS entity
     let entityText = createEntity();
     entityText.AddComponent(Componets.Position({x:10, y:50}));
-    entityText.AddComponent(Componets.Sprite('#FFFFFF'));
-    entityText.AddComponent(Componets.SpriteType(Componets.SpriteType().FILL_TEXT));
+    entityText.AddComponent(Componets.Shape({style:'#FFFFFF',type:Tags.FILL_TEXT}));
     entityText.AddComponent(Componets.FPS());
     entityText.AddComponent(Componets.Text(''));
-    entities.push(entityText);  
+    entities.push(entityText); 
 
-    let style = null;
-    
-    let pos = {
-        x:0,
-        y:0
-    };
     //
-    
-    for (let i = 0; i < 10; i++) {
-        pos.x = randomPosition(50,canvas.width);
-        pos.y = randomPosition(50,canvas.height);
-        style = randomStyles();
-    
-        let entity = createEntity();
-        entity.AddComponent(Componets.Health());
-        entity.AddComponent(Componets.Position(pos));
-        entity.AddComponent(Componets.SpriteType());
-        entity.AddComponent(Componets.Sprite(style));
-        entity.AddComponent(Componets.Dimension({w:50,h:70}));
-        entities.push(entity);        
+    let entityRect = createEntity();
+    entityRect.AddComponent(Componets.Position({x: canvas.width /2, y: canvas.height /2}));
+    entityRect.AddComponent(Componets.Dimension());
+    entityRect.AddComponent(Componets.Velocity());
+    entityRect.AddComponent(Componets.Acceleration({ax:0, ay:-0.5}));
+    entityRect.AddComponent(Componets.Shape({style:'#F70B0B',type:Tags.FILL_RECT}));
+    entities.push(entityRect)
+    //
+    let image = new Image();
+    let src = './images/ship_0009.png'
+
+    let entitySprite = createEntity();
+    entitySprite.AddComponent(Componets.Position({x: 300, y: canvas.height /2}));
+    entitySprite.AddComponent(Componets.Dimension({w:150,h:150}));
+    entitySprite.AddComponent(Componets.Velocity());
+    entitySprite.AddComponent(Componets.Acceleration({ax:0, ay:-0.5}));
+    entitySprite.AddComponent(Componets.Sprite({image:image, src:src}));
+    entities.push(entitySprite);
+
+    const COUNT = 50;
+
+    for (let i = 0; i < COUNT; i++) {
+        const ship = createEntity();
+        ship.AddComponent(Componets.Position({x: randomPosition(0, canvas.width), y: randomPosition(50, canvas.height)}));
+        ship.AddComponent(Componets.Dimension({w:150,h:150}));
+        ship.AddComponent(Componets.Velocity());
+        ship.AddComponent(Componets.Acceleration({ax:0, ay:-0.3}));
+        ship.AddComponent(Componets.Sprite({image:image, src:src}));
+        entities.push(ship)
     }
-    //
 
-    style = '#38f';
-    let entity1 = createEntity('Player');
-    entity1.AddComponent(Componets.Health());
-    entity1.AddComponent(Componets.Position({x:50,y:700}));
-    entity1.AddComponent(Componets.SpriteType(Componets.SpriteType().STROKE_RECT));
-    entity1.AddComponent(Componets.Sprite(style));
-    entity1.AddComponent(Componets.Dimension({w:50,h:70}));
-    entities.push(entity1);
-
-    //
-    let entityArc = createEntity();
-    entityArc.AddComponent(Componets.Position({x:300,y:500}));
-    entityArc.AddComponent(Componets.Velocity({vx:0, vy:0}));
-    entityArc.AddComponent(Componets.Acceleration({ax:0.5, ay:0.5}));
-    entityArc.AddComponent(Componets.SpriteType(Componets.SpriteType().ARC));
-    entityArc.AddComponent(Componets.Sprite(style));
-    entityArc.AddComponent(Componets.Arc({radius:25,stroke:0,lineWidth:5}));
-    entities.push(entityArc);
-
+    console.log(entities.length);
 
     //render system
     sys.push(Systems.SystemRender(ctx, entities));
